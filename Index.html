@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Control de Tensión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f10;
+    --surface: #1a1a1c;
+    --surface2: #242428;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0ede8;
+    --text2: #8a8780;
+    --text3: #4a4845;
+    --ok: #4ade80;
+    --ok-bg: rgba(74,222,128,0.1);
+    --warn: #fb923c;
+    --warn-bg: rgba(251,146,60,0.1);
+    --danger: #f87171;
+    --danger-bg: rgba(248,113,113,0.12);
+    --accent: #a78bfa;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100dvh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  /* HEADER */
+  .header {
+    padding: 52px 24px 20px;
+    position: relative;
+  }
+  .header-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+  }
+  .header-title {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+
+  /* STATUS CARD */
+  .status-card {
+    margin: 0 16px 16px;
+    border-radius: 20px;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: background 0.4s, border-color 0.4s;
+  }
+  .status-card.ok    { background: var(--ok-bg);     border-color: rgba(74,222,128,0.2); }
+  .status-card.warn  { background: var(--warn-bg);   border-color: rgba(251,146,60,0.25); }
+  .status-card.over  { background: var(--danger-bg); border-color: rgba(248,113,113,0.3); }
+
+  .status-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .status-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .ok   .status-badge { background: rgba(74,222,128,0.2);  color: var(--ok); }
+  .warn .status-badge { background: rgba(251,146,60,0.2);  color: var(--warn); }
+  .over .status-badge { background: rgba(248,113,113,0.2); color: var(--danger); animation: pulse 1s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  .status-amperes {
+    font-family: var(--font-mono);
+    font-size: 38px;
+    font-weight: 400;
+    letter-spacing: -1px;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .ok   .status-amperes { color: var(--ok); }
+  .warn .status-amperes { color: var(--warn); }
+  .over .status-amperes { color: var(--danger); }
+
+  .status-limit {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  /* BAR */
+  .bar-wrap {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 14px;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1), background 0.3s;
+    background: var(--ok);
+  }
+  .warn .bar-fill  { background: var(--warn); }
+  .over .bar-fill  { background: var(--danger); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin: 0 16px 16px;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 5px;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px 8px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+  }
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* CONFIG STRIP */
+  .config-strip {
+    display: flex;
+    gap: 10px;
+    margin: 0 16px 16px;
+  }
+  .config-pill {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+  }
+  .config-pill-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: var(--font-mono);
+    margin-bottom: 4px;
+  }
+  .config-pill-val {
+    font-size: 18px;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    color: var(--text);
+  }
+  .config-pill select {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    outline: none;
+    width: 100%;
+    cursor: pointer;
+    appearance: none;
+  }
+  .config-pill select option {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  /* EQUIPMENT LIST */
+  .list-section {
+    margin: 0 16px;
+  }
+  .list-header {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+    padding: 0 4px;
+  }
+
+  .eq-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 8px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .eq-item.active {
+    border-color: rgba(167,139,250,0.3);
+    background: rgba(167,139,250,0.05);
+  }
+
+  .eq-left { flex: 1; min-width: 0; }
+  .eq-name {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .eq-watts {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+  .eq-item.active .eq-watts { color: var(--accent); opacity: 0.8; }
+
+  .qty-control {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .qty-btn {
+    width: 38px;
+    height: 38px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .qty-btn:active { background: rgba(255,255,255,0.08); color: var(--text); }
+  .qty-num {
+    width: 36px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0;
+  }
+
+  /* SAVE BUTTON */
+  .save-wrap {
+    padding: 20px 16px 28px;
+  }
+  .save-btn {
+    width: 100%;
+    padding: 17px;
+    border-radius: 16px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: opacity 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .save-btn:active { transform: scale(0.98); opacity: 0.9; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    padding: 12px 20px;
+    border-radius: 100px;
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(74,222,128,0.3); color: var(--ok); }
+  .toast.error   { border-color: rgba(248,113,113,0.3); color: var(--danger); }
+
+  /* SETUP SCREEN */
+  .setup-screen {
+    padding: 60px 24px 40px;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .setup-screen h2 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .setup-screen p  { font-size: 14px; color: var(--text2); margin-bottom: 32px; line-height: 1.6; }
+  .setup-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 15px 18px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: var(--font-body);
+    outline: none;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .setup-input:focus { border-color: rgba(167,139,250,0.5); }
+  .setup-input::placeholder { color: var(--text3); }
+  .setup-note {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN (shown when no Google Script URL is set) -->
+<div id="setupScreen" class="setup-screen" style="display:none">
+  <div class="header-label">Configuración inicial</div>
+  <h2>URL de Google Sheets</h2>
+  <p>Pegá la URL de tu Google Apps Script para conectar la app con la planilla.</p>
+  <input id="scriptUrlInput" class="setup-input" type="url" placeholder="https://script.google.com/macros/s/..." autocomplete="off" autocorrect="off">
+  <button class="save-btn" onclick="saveScriptUrl()">Guardar y continuar →</button>
+  <p class="setup-note">Esta URL se guarda en tu dispositivo. Podés cambiarla en cualquier momento desde el ⚙ arriba.</p>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+  <div class="header">
+    <div class="header-label">⚡ Sistema de control</div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="header-title">Tensión</div>
+      <button onclick="showSetup()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text2);font-size:13px;cursor:pointer;">⚙ Config</button>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-card ok" id="statusCard">
+    <div class="status-top">
+      <div>
+        <div class="status-amperes" id="statusAmp">0.0 A</div>
+        <div class="status-limit" id="statusLimit">de 10 A máx</div>
+      </div>
+      <div class="status-badge" id="statusBadge">OK</div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-fill" id="barFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="filterTab('todos',this)">Todos</button>
+    <button class="tab" onclick="filterTab('Iluminacion',this)">Iluminación</button>
+    <button class="tab" onclick="filterTab('Sonido',this)">Sonido</button>
+    <button class="tab" onclick="filterTab('Pantalla',this)">Pantalla</button>
+  </div>
+
+  <!-- CONFIG STRIP -->
+  <div class="config-strip">
+    <div class="config-pill">
+      <div class="config-pill-label">Límite (A)</div>
+      <select id="limitSelect" onchange="updateStatus()">
+        <option value="10">10 A</option>
+        <option value="16">16 A</option>
+      </select>
+    </div>
+    <div class="config-pill" style="cursor:default">
+      <div class="config-pill-label">Umbral cuidado</div>
+      <div class="config-pill-val" id="warnVal">8.0 A</div>
+    </div>
+    <div class="config-pill" style="cursor:default">
+      <div class="config-pill-label">Potencia total</div>
+      <div class="config-pill-val" id="totalWatts">0 W</div>
+    </div>
+  </div>
+
+  <!-- EQUIPMENT LIST -->
+  <div class="list-section">
+    <div class="list-header">Equipos</div>
+    <div id="eqList"></div>
+  </div>
+
+  <!-- SAVE -->
+  <div class="save-wrap">
+    <button class="save-btn" id="saveBtn" onclick="saveToSheets()">Guardar en Google Sheets</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── EQUIPMENT DATA ───────────────────────────────────────────────
+const EQUIPOS = [
+  { nombre: "Cabezal Movil 9R",      watts: 320, tipo: "Iluminacion" },
+  { nombre: "Cabezal Movil 7R",      watts: 300, tipo: "Iluminacion" },
+  { nombre: "Cabezal Moly",          watts: 200, tipo: "Iluminacion" },
+  { nombre: "Kaleido",               watts: 350, tipo: "Iluminacion" },
+  { nombre: "Beasty",                watts: 150, tipo: "Iluminacion" },
+  { nombre: "LM/PLS Movil",          watts: 110, tipo: "Iluminacion" },
+  { nombre: "Decabeam",              watts: 320, tipo: "Iluminacion" },
+  { nombre: "Pixi",                  watts: 110, tipo: "Iluminacion" },
+  { nombre: "BigPar 180",            watts: 200, tipo: "Iluminacion" },
+  { nombre: "Nebula 210",            watts: 150, tipo: "Iluminacion" },
+  { nombre: "Nebula Dual",           watts: 120, tipo: "Iluminacion" },
+  { nombre: "Nebula Negros",         watts: 150, tipo: "Iluminacion" },
+  { nombre: "Minibrut",              watts: 200, tipo: "Iluminacion" },
+  { nombre: "Strobos Full",          watts: 800, tipo: "Iluminacion" },
+  { nombre: "Strobos Med",           watts: 480, tipo: "Iluminacion" },
+  { nombre: "Hazer PLS",             watts: 600, tipo: "Iluminacion" },
+  { nombre: "Fazer Tecshow",         watts: 700, tipo: "Iluminacion" },
+  { nombre: "M.Humo Vertical",       watts: 700, tipo: "Iluminacion" },
+  { nombre: "M.Humo Neo Gris",       watts: 1550, tipo: "Iluminacion" },
+  { nombre: "Audiocenter GT15",      watts: 95,  tipo: "Sonido" },
+  { nombre: "Audiocenter Sub Doble", watts: 237, tipo: "Sonido" },
+  { nombre: "Audiocenter Sub Simple",watts: 149, tipo: "Sonido" },
+  { nombre: "STS Sub 600",           watts: 150, tipo: "Sonido" },
+  { nombre: "STS Sub 1200",          watts: 150, tipo: "Sonido" },
+  { nombre: "Sub Audiolab 12",       watts: 100, tipo: "Sonido" },
+  { nombre: "Idea",                  watts: 80,  tipo: "Sonido" },
+  { nombre: "EV Sistema",            watts: 160, tipo: "Sonido" },
+  { nombre: "EV 10",                 watts: 130, tipo: "Sonido" },
+  { nombre: "Monitor Turbosound",    watts: 120, tipo: "Sonido" },
+  { nombre: "Cabezal Moly",          watts: 200, tipo: "Pantalla" },
+];
+
+const V = 220;
+let cantidades = {};
+let tabActivo = 'todos';
+
+EQUIPOS.forEach((e, i) => cantidades[i] = 0);
+
+// ─── RENDER ───────────────────────────────────────────────────────
+function renderList() {
+  const container = document.getElementById('eqList');
+  container.innerHTML = '';
+  EQUIPOS.forEach((eq, i) => {
+    if (tabActivo !== 'todos' && eq.tipo !== tabActivo) return;
+    const div = document.createElement('div');
+    div.className = 'eq-item' + (cantidades[i] > 0 ? ' active' : '');
+    div.id = 'eqitem-' + i;
+    div.innerHTML = `
+      <div class="eq-left">
+        <div class="eq-name">${eq.nombre}</div>
+        <div class="eq-watts">${eq.watts} W · ${(eq.watts/V).toFixed(2)} A/u · ${eq.tipo}</div>
+      </div>
+      <div class="qty-control">
+        <button class="qty-btn" onclick="change(${i},-1)">−</button>
+        <input class="qty-num" type="number" min="0" max="99" value="${cantidades[i]}"
+          onchange="setVal(${i},this.value)" inputmode="numeric">
+        <button class="qty-btn" onclick="change(${i},+1)">+</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function change(i, delta) {
+  cantidades[i] = Math.max(0, (cantidades[i] || 0) + delta);
+  const inp = document.querySelector(`#eqitem-${i} .qty-num`);
+  if (inp) inp.value = cantidades[i];
+  document.getElementById('eqitem-' + i)?.classList.toggle('active', cantidades[i] > 0);
+  updateStatus();
+}
+
+function setVal(i, v) {
+  cantidades[i] = Math.max(0, parseInt(v) || 0);
+  document.getElementById('eqitem-' + i)?.classList.toggle('active', cantidades[i] > 0);
+  updateStatus();
+}
+
+function filterTab(tipo, el) {
+  tabActivo = tipo;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+// ─── STATUS ───────────────────────────────────────────────────────
+function updateStatus() {
+  const limit = parseFloat(document.getElementById('limitSelect').value);
+  const warn  = limit * 0.8;
+  let totalW  = 0;
+  EQUIPOS.forEach((eq, i) => { totalW += eq.watts * (cantidades[i] || 0); });
+  const totalA = totalW / V;
+
+  document.getElementById('statusAmp').textContent  = totalA.toFixed(1) + ' A';
+  document.getElementById('statusLimit').textContent = 'de ' + limit + ' A máx';
+  document.getElementById('warnVal').textContent     = warn.toFixed(1) + ' A';
+  document.getElementById('totalWatts').textContent  = totalW.toLocaleString('es') + ' W';
+
+  const pct = Math.min((totalA / limit) * 100, 100);
+  document.getElementById('barFill').style.width = pct + '%';
+
+  const card   = document.getElementById('statusCard');
+  const badge  = document.getElementById('statusBadge');
+  card.className = 'status-card';
+  if (totalA > limit)     { card.classList.add('over');  badge.textContent = 'SOBRECARGA'; }
+  else if (totalA > warn) { card.classList.add('warn');  badge.textContent = 'CUIDADO'; }
+  else                    { card.classList.add('ok');    badge.textContent = 'OK'; }
+}
+
+// ─── GOOGLE SHEETS ────────────────────────────────────────────────
+const STORAGE_KEY = 'ct_script_url';
+
+function getScriptUrl() { return localStorage.getItem(STORAGE_KEY) || ''; }
+function saveScriptUrl() {
+  const url = document.getElementById('scriptUrlInput').value.trim();
+  if (!url.startsWith('https://script.google.com')) {
+    showToast('URL inválida', 'error'); return;
+  }
+  localStorage.setItem(STORAGE_KEY, url);
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  showToast('URL guardada ✓', 'success');
+}
+
+function showSetup() {
+  document.getElementById('scriptUrlInput').value = getScriptUrl();
+  document.getElementById('setupScreen').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+}
+
+async function saveToSheets() {
+  const url = getScriptUrl();
+  if (!url) { showSetup(); return; }
+
+  const limit  = parseFloat(document.getElementById('limitSelect').value);
+  const totalW = EQUIPOS.reduce((s,e,i) => s + e.watts*(cantidades[i]||0), 0);
+  const totalA = (totalW / V).toFixed(2);
+  const badge  = document.getElementById('statusBadge').textContent;
+  const fecha  = new Date().toLocaleString('es-AR', { dateStyle:'short', timeStyle:'short' });
+
+  const filas = EQUIPOS
+    .map((e,i) => ({ equipo: e.nombre, cantidad: cantidades[i]||0, tipo: e.tipo, watts: e.watts }))
+    .filter(f => f.cantidad > 0);
+
+  if (!filas.length) { showToast('No hay equipos cargados', 'error'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  try {
+    const payload = { fecha, limite: limit, totalAmperes: totalA, estado: badge, equipos: filas };
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    showToast('Guardado en Sheets ✓', 'success');
+  } catch(e) {
+    showToast('Error al guardar', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar en Google Sheets';
+  }
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.className = 'toast ' + type, 2800);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+if (!getScriptUrl()) {
+  document.getElementById('setupScreen').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+} else {
+  document.getElementById('setupScreen').style.display = 'none';
+}
+renderList();
+updateStatus();
+</script>
+</body>
+</html>
