@@ -471,6 +471,7 @@
     <div class="bar-wrap">
       <div class="bar-fill" id="barFill" style="width:0%"></div>
     </div>
+    <div id="practicalNote" style="display:none;margin-top:11px;padding-top:11px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;color:var(--text2);font-family:var(--font-mono);line-height:1.6"></div>
   </div>
 
   <!-- TABS -->
@@ -632,22 +633,33 @@ function updateStatus() {
   EQUIPOS.forEach((eq, i) => { totalW += eq.watts * (cantidades[i] || 0); });
   const totalA = totalW / V;
 
-  document.getElementById('statusAmp').textContent  = totalA.toFixed(1) + ' A';
-  document.getElementById('statusLimit').textContent = 'de ' + limit + ' A máx';
+  document.getElementById('statusAmp').textContent   = totalA.toFixed(1) + ' A';
+  document.getElementById('statusLimit').textContent = 'teórico · de ' + limit + ' A máx';
   document.getElementById('warnVal').textContent     = warn.toFixed(1) + ' A';
   document.getElementById('totalWatts').textContent  = totalW.toLocaleString('es') + ' W';
 
   const pct = Math.min((totalA / limit) * 100, 100);
   document.getElementById('barFill').style.width = pct + '%';
 
-  const card   = document.getElementById('statusCard');
-  const badge  = document.getElementById('statusBadge');
+  const card  = document.getElementById('statusCard');
+  const badge = document.getElementById('statusBadge');
   card.className = 'status-card';
   if (totalA > limit)     { card.classList.add('over');  badge.textContent = 'SOBRECARGA'; }
   else if (totalA > warn) { card.classList.add('warn');  badge.textContent = 'CUIDADO'; }
   else                    { card.classList.add('ok');    badge.textContent = 'OK'; }
 
-  // Generator
+  // Nota práctica: rango real estimado (40-55% del teórico, basado en mediciones reales)
+  const note = document.getElementById('practicalNote');
+  if (totalW > 0) {
+    const rMin = (totalA * 0.40).toFixed(1);
+    const rMax = (totalA * 0.55).toFixed(1);
+    note.style.display = 'block';
+    note.textContent = '⚡ En la práctica esperá entre ' + rMin + ' A y ' + rMax + ' A reales';
+  } else {
+    note.style.display = 'none';
+  }
+
+  // Generator basado en teórico (dimensionamos por el peor caso)
   const kva = totalW / 800;
   const sizes = [2,3,4,5,6,8,10,12,15,20,25,30,40,50];
   const suggested = sizes.find(s => s >= kva) || sizes[sizes.length-1];
