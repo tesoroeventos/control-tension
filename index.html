@@ -336,6 +336,74 @@
   .toast.success { border-color: rgba(74,222,128,0.3); color: var(--ok); }
   .toast.error   { border-color: rgba(248,113,113,0.3); color: var(--danger); }
 
+  /* GENERATOR CARD */
+  .gen-card {
+    margin: 0 16px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px 20px;
+  }
+  .gen-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    margin-bottom: 14px;
+  }
+  .gen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .gen-stat {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .gen-stat-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .gen-stat-val {
+    font-size: 20px;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    color: var(--text);
+    line-height: 1;
+  }
+  .gen-stat-unit {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 3px;
+    font-family: var(--font-mono);
+  }
+  .gen-stat.highlight .gen-stat-val { color: var(--accent); }
+
+  /* RESET BUTTON */
+  .reset-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(248,113,113,0.2);
+    background: rgba(248,113,113,0.06);
+    color: var(--danger);
+    font-size: 15px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 10px;
+  }
+  .reset-btn:active { transform: scale(0.98); background: rgba(248,113,113,0.12); }
+
   /* SETUP SCREEN */
   .setup-screen {
     padding: 60px 24px 40px;
@@ -438,8 +506,31 @@
     <div id="eqList"></div>
   </div>
 
+  <!-- GENERATOR -->
+  <div class="gen-card">
+    <div class="gen-title">⚡ Generador requerido</div>
+    <div class="gen-grid">
+      <div class="gen-stat">
+        <div class="gen-stat-label">Potencia</div>
+        <div class="gen-stat-val" id="genW">0</div>
+        <div class="gen-stat-unit">W</div>
+      </div>
+      <div class="gen-stat">
+        <div class="gen-stat-label">kVA req.</div>
+        <div class="gen-stat-val" id="genKva">0.0</div>
+        <div class="gen-stat-unit">kVA</div>
+      </div>
+      <div class="gen-stat highlight">
+        <div class="gen-stat-label">Generador</div>
+        <div class="gen-stat-val" id="genSug">—</div>
+        <div class="gen-stat-unit">kVA</div>
+      </div>
+    </div>
+  </div>
+
   <!-- SAVE -->
   <div class="save-wrap">
+    <button class="reset-btn" onclick="resetAll()">↺ Resetear todo</button>
     <button class="save-btn" id="saveBtn" onclick="saveToSheets()">Guardar en Google Sheets</button>
   </div>
 </div>
@@ -555,6 +646,14 @@ function updateStatus() {
   if (totalA > limit)     { card.classList.add('over');  badge.textContent = 'SOBRECARGA'; }
   else if (totalA > warn) { card.classList.add('warn');  badge.textContent = 'CUIDADO'; }
   else                    { card.classList.add('ok');    badge.textContent = 'OK'; }
+
+  // Generator
+  const kva = totalW / 800;
+  const sizes = [2,3,4,5,6,8,10,12,15,20,25,30,40,50];
+  const suggested = sizes.find(s => s >= kva) || sizes[sizes.length-1];
+  document.getElementById('genW').textContent   = totalW.toLocaleString('es');
+  document.getElementById('genKva').textContent = kva.toFixed(1);
+  document.getElementById('genSug').textContent = totalW === 0 ? '—' : suggested;
 }
 
 // ─── GOOGLE SHEETS ────────────────────────────────────────────────
@@ -611,6 +710,15 @@ async function saveToSheets() {
   } finally {
     btn.disabled = false; btn.textContent = 'Guardar en Google Sheets';
   }
+}
+
+// ─── RESET ────────────────────────────────────────────────────────
+function resetAll() {
+  if (!confirm('¿Resetear todos los equipos a 0?')) return;
+  EQUIPOS.forEach((e, i) => cantidades[i] = 0);
+  renderList();
+  updateStatus();
+  showToast('Todo reseteado', '');
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────
