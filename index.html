@@ -404,6 +404,167 @@
   }
   .reset-btn:active { transform: scale(0.98); background: rgba(248,113,113,0.12); }
 
+  /* TRIFASIC SCREEN */
+  .trifasic-screen {
+    display: none;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  .trifasic-header {
+    padding: 52px 24px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .back-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: var(--text2);
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .lineas-selector {
+    display: flex;
+    gap: 8px;
+    margin: 0 16px 16px;
+  }
+  .linea-opt {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .linea-opt.active {
+    background: rgba(167,139,250,0.12);
+    border-color: rgba(167,139,250,0.4);
+    color: var(--accent);
+  }
+  .balance-bar-wrap {
+    margin: 0 16px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .balance-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    margin-bottom: 12px;
+  }
+  .balance-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .balance-row:last-child { margin-bottom: 0; }
+  .balance-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    width: 20px;
+    flex-shrink: 0;
+  }
+  .lR { color: #f87171; }
+  .lS { color: #fbbf24; }
+  .lT { color: #60a5fa; }
+  .balance-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .balance-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .fillR { background: #f87171; }
+  .fillS { background: #fbbf24; }
+  .fillT { background: #60a5fa; }
+  .balance-amp {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+    width: 44px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .linea-card {
+    margin: 0 16px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .linea-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .linea-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .linea-card-info {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: var(--font-mono);
+  }
+  .linea-equipo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .linea-equipo-row:last-child { border-bottom: none; }
+  .linea-eq-name { font-size: 13px; color: var(--text); }
+  .linea-eq-detail { font-size: 11px; color: var(--text3); font-family: var(--font-mono); margin-top: 1px; }
+  .move-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 9px;
+    color: var(--text2);
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .move-btn:active { background: rgba(167,139,250,0.15); color: var(--accent); }
+  .trifasic-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    border: 1px solid rgba(167,139,250,0.3);
+    background: rgba(167,139,250,0.08);
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .trifasic-btn:active { transform: scale(0.98); background: rgba(167,139,250,0.15); }
+
   /* SETUP SCREEN */
   .setup-screen {
     padding: 60px 24px 40px;
@@ -531,8 +692,56 @@
 
   <!-- SAVE -->
   <div class="save-wrap">
+    <button class="trifasic-btn" onclick="showTrifasic()">⚡ Distribución trifásica</button>
     <button class="reset-btn" onclick="resetAll()">↺ Resetear todo</button>
     <button class="save-btn" id="saveBtn" onclick="saveToSheets()">Guardar en Google Sheets</button>
+  </div>
+</div>
+
+<!-- TRIFASIC SCREEN -->
+<div id="trifasicScreen" class="trifasic-screen">
+  <div class="trifasic-header">
+    <button class="back-btn" onclick="hideTrifasic()">← Volver</button>
+    <div>
+      <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:2px;text-transform:uppercase">Distribución</div>
+      <div style="font-size:18px;font-weight:600">Trifásico</div>
+    </div>
+  </div>
+
+  <div style="padding:0 16px;margin-bottom:12px">
+    <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Cantidad de líneas</div>
+    <div class="lineas-selector">
+      <div class="linea-opt active" id="opt2" onclick="setLineas(2)">2 líneas</div>
+      <div class="linea-opt" id="opt3" onclick="setLineas(3)">3 líneas</div>
+    </div>
+  </div>
+
+  <!-- BALANCE VISUAL -->
+  <div class="balance-bar-wrap">
+    <div class="balance-title">Balance de carga</div>
+    <div class="balance-row">
+      <div class="balance-label lR">R</div>
+      <div class="balance-track"><div class="balance-fill fillR" id="barR" style="width:0%"></div></div>
+      <div class="balance-amp" id="ampR">0.0 A</div>
+    </div>
+    <div class="balance-row">
+      <div class="balance-label lS">S</div>
+      <div class="balance-track"><div class="balance-fill fillS" id="barS" style="width:0%"></div></div>
+      <div class="balance-amp" id="ampS">0.0 A</div>
+    </div>
+    <div class="balance-row" id="rowT">
+      <div class="balance-label lT">T</div>
+      <div class="balance-track"><div class="balance-fill fillT" id="barT" style="width:0%"></div></div>
+      <div class="balance-amp" id="ampT">0.0 A</div>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text3);font-family:var(--font-mono)" id="balanceNote"></div>
+  </div>
+
+  <!-- LINEAS -->
+  <div id="lineasContainer"></div>
+
+  <div style="padding:0 16px 32px">
+    <button class="save-btn" onclick="saveDistribucionSheets()">Guardar distribución en Sheets</button>
   </div>
 </div>
 
@@ -721,6 +930,228 @@ async function saveToSheets() {
     showToast('Error al guardar', 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Guardar en Google Sheets';
+  }
+}
+
+// ─── TRIFÁSICO ────────────────────────────────────────────────────
+const LINEA_COLORS = { R: 'lR', S: 'lS', T: 'lT' };
+const LINEA_NAMES  = ['R', 'S', 'T'];
+let numLineas = 2;
+let distribucion = {}; // { itemKey: 'R'|'S'|'T' }
+
+function showTrifasic() {
+  const activos = EQUIPOS.filter((e,i) => (cantidades[i]||0) > 0);
+  if (!activos.length) { showToast('Cargá equipos primero', 'error'); return; }
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('trifasicScreen').style.display = 'block';
+  distribuirAutomatico();
+}
+
+function hideTrifasic() {
+  document.getElementById('trifasicScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+}
+
+function setLineas(n) {
+  numLineas = n;
+  document.getElementById('opt2').classList.toggle('active', n === 2);
+  document.getElementById('opt3').classList.toggle('active', n === 3);
+  document.getElementById('rowT').style.display = n === 3 ? 'flex' : 'none';
+  distribuirAutomatico();
+}
+
+function distribuirAutomatico() {
+  distribucion = {};
+  const lineas = LINEA_NAMES.slice(0, numLineas);
+
+  // Expandir equipos en unidades individuales
+  let items = [];
+  EQUIPOS.forEach((eq, i) => {
+    const qty = cantidades[i] || 0;
+    for (let u = 0; u < qty; u++) {
+      items.push({ eqIdx: i, unit: u, nombre: eq.nombre, watts: eq.watts, tipo: eq.tipo });
+    }
+  });
+
+  // Ordenar: primero por tipo (Iluminacion → Sonido → Pantalla), luego por watts desc
+  const tipoOrd = { 'Iluminacion': 0, 'Sonido': 1, 'Pantalla': 2 };
+  items.sort((a, b) => {
+    if (tipoOrd[a.tipo] !== tipoOrd[b.tipo]) return tipoOrd[a.tipo] - tipoOrd[b.tipo];
+    return b.watts - a.watts;
+  });
+
+  // Greedy: asignar cada item a la línea con menos carga actual
+  const cargaLinea = {};
+  lineas.forEach(l => cargaLinea[l] = 0);
+
+  items.forEach(item => {
+    const key = item.eqIdx + '_' + item.unit;
+    const lineaMenor = lineas.reduce((min, l) => cargaLinea[l] < cargaLinea[min] ? l : min, lineas[0]);
+    distribucion[key] = lineaMenor;
+    cargaLinea[lineaMenor] += item.watts;
+  });
+
+  renderDistribucion();
+}
+
+function moverEquipo(key, lineasDisp) {
+  const actual = distribucion[key];
+  const idx = lineasDisp.indexOf(actual);
+  distribucion[key] = lineasDisp[(idx + 1) % lineasDisp.length];
+  renderDistribucion();
+}
+
+function renderDistribucion() {
+  const lineas = LINEA_NAMES.slice(0, numLineas);
+
+  // Calcular amperes por línea
+  const wattsLinea = {};
+  lineas.forEach(l => wattsLinea[l] = 0);
+
+  let items = [];
+  EQUIPOS.forEach((eq, i) => {
+    const qty = cantidades[i] || 0;
+    for (let u = 0; u < qty; u++) {
+      const key = i + '_' + u;
+      const linea = distribucion[key] || lineas[0];
+      wattsLinea[linea] += eq.watts;
+      items.push({ key, eqIdx: i, unit: u, nombre: eq.nombre, watts: eq.watts, tipo: eq.tipo, linea });
+    }
+  });
+
+  const maxW = Math.max(...Object.values(wattsLinea), 1);
+
+  // Barras de balance
+  lineas.forEach(l => {
+    const a = (wattsLinea[l] / V).toFixed(1);
+    document.getElementById('amp' + l).textContent = a + ' A';
+    document.getElementById('bar' + l).style.width = (wattsLinea[l] / maxW * 100) + '%';
+  });
+
+  // Nota de balance
+  const vals = lineas.map(l => wattsLinea[l] / V);
+  const diff = Math.max(...vals) - Math.min(...vals);
+  const note = document.getElementById('balanceNote');
+  if (diff < 1)       note.textContent = '✓ Carga bien balanceada';
+  else if (diff < 3)  note.textContent = '~ Desbalance leve: ' + diff.toFixed(1) + ' A entre líneas';
+  else                note.textContent = '⚠ Desbalance de ' + diff.toFixed(1) + ' A — mové equipos para equilibrar';
+
+  // Render cards por línea
+  const container = document.getElementById('lineasContainer');
+  container.innerHTML = '';
+
+  lineas.forEach(l => {
+    const lineaItems = items.filter(it => it.linea === l);
+    const totalA = (wattsLinea[l] / V).toFixed(1);
+    const totalW = wattsLinea[l];
+
+    const card = document.createElement('div');
+    card.className = 'linea-card';
+
+    const colorClass = LINEA_COLORS[l];
+    card.innerHTML = `
+      <div class="linea-card-header">
+        <div class="linea-card-title ${colorClass}">Línea ${l}</div>
+        <div class="linea-card-info">${totalA} A · ${totalW.toLocaleString('es')} W</div>
+      </div>
+    `;
+
+    if (lineaItems.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'padding:14px 16px;font-size:13px;color:var(--text3);font-style:italic';
+      empty.textContent = 'Sin equipos asignados';
+      card.appendChild(empty);
+    } else {
+      // Agrupar mismos equipos
+      const grupos = {};
+      lineaItems.forEach(it => {
+        if (!grupos[it.eqIdx]) grupos[it.eqIdx] = { ...it, count: 0, keys: [] };
+        grupos[it.eqIdx].count++;
+        grupos[it.eqIdx].keys.push(it.key);
+      });
+
+      Object.values(grupos).forEach(g => {
+        const row = document.createElement('div');
+        row.className = 'linea-equipo-row';
+        const otrasLineas = lineas.filter(x => x !== l);
+        const moverLabel = 'Mover a ' + otrasLineas.join('/');
+        row.innerHTML = `
+          <div>
+            <div class="linea-eq-name">${g.count > 1 ? g.count + '× ' : ''}${g.nombre}</div>
+            <div class="linea-eq-detail">${g.tipo} · ${(g.watts * g.count / V).toFixed(2)} A</div>
+          </div>
+          <button class="move-btn" onclick="moverGrupo(${g.eqIdx}, '${l}')">
+            ${moverLabel}
+          </button>
+        `;
+        card.appendChild(row);
+      });
+    }
+
+    container.appendChild(card);
+  });
+}
+
+function moverGrupo(eqIdx, lineaActual) {
+  const lineas = LINEA_NAMES.slice(0, numLineas);
+  const idx = lineas.indexOf(lineaActual);
+  const nuevaLinea = lineas[(idx + 1) % lineas.length];
+  // Mover todas las unidades de este equipo en esta línea
+  Object.keys(distribucion).forEach(key => {
+    if (key.startsWith(eqIdx + '_') && distribucion[key] === lineaActual) {
+      distribucion[key] = nuevaLinea;
+    }
+  });
+  renderDistribucion();
+}
+
+async function saveDistribucionSheets() {
+  const url = getScriptUrl();
+  if (!url) { showToast('Configurá la URL primero', 'error'); return; }
+
+  const lineas = LINEA_NAMES.slice(0, numLineas);
+  const wattsLinea = {};
+  lineas.forEach(l => wattsLinea[l] = 0);
+
+  const detalleLineas = {};
+  lineas.forEach(l => detalleLineas[l] = []);
+
+  EQUIPOS.forEach((eq, i) => {
+    const qty = cantidades[i] || 0;
+    const grupos = {};
+    for (let u = 0; u < qty; u++) {
+      const key = i + '_' + u;
+      const linea = distribucion[key] || lineas[0];
+      grupos[linea] = (grupos[linea] || 0) + 1;
+      wattsLinea[linea] += eq.watts;
+    }
+    Object.entries(grupos).forEach(([linea, cant]) => {
+      detalleLineas[linea].push({ equipo: eq.nombre, cantidad: cant, tipo: eq.tipo, watts: eq.watts });
+    });
+  });
+
+  const fecha = new Date().toLocaleString('es-AR', { dateStyle:'short', timeStyle:'short' });
+  const payload = {
+    tipo: 'distribucion',
+    fecha,
+    numLineas,
+    lineas: lineas.map(l => ({
+      linea: l,
+      amperes: (wattsLinea[l] / V).toFixed(2),
+      watts: wattsLinea[l],
+      equipos: detalleLineas[l]
+    }))
+  };
+
+  try {
+    await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    showToast('Distribución guardada ✓', 'success');
+  } catch(e) {
+    showToast('Error al guardar', 'error');
   }
 }
 
